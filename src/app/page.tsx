@@ -1,66 +1,77 @@
-import { signIn, auth } from "../../auth";
+// import { signIn, auth } from "../../auth";
+// export default async function SignIn() {
+// 	const session = await auth();
+// 	const myToken = session?.myIdToken;
+// 	console.log(myToken);
 
-export default async function SignIn() {
-	const session = await auth();
-	const myToken = session?.myIdToken;
+// 	// Usage example with POST:
+// 	try {
+// 		const jwt = myToken;
+// 		if (jwt) {
+// 			const d = await fetch("http://localhost:5158/cookie", { credentials: "include",  mode: "cors" });
+// 			console.log(d)
+// 		}
+// 	} catch (error) {
+// 		console.log("YOU HAVE AN ERROR");
+// 		console.error("Error:", error);
+// 	}
 
-	const makeAuthenticatedRequest = async (
-		url: string,
-		jwt: string,
-		method: "GET" | "POST" | "PUT" | "DELETE" = "GET",
-		body?: object
-	) => {
-		const options: RequestInit = {
-			method,
-			credentials: "include", // Enable cookie handling
-			headers: {
-				Authorization: `Bearer ${jwt}`,
-				"Content-Type": "application/json",
-			},
-		};
+// 	return (
+// 		<>
+// 			<form
+// 				action={async () => {
+// 					"use server";
+// 					await signIn("google");
+// 				}}
+// 			>
+// 				<button type="submit">Signin with Google</button>
+// 			</form>
+// 		</>
+// 	);
+// }
 
-		if (body) {
-			options.body = JSON.stringify(body);
+"use client";
+import { signIn } from "next-auth/react";
+import { useSession } from "next-auth/react";
+export default function Hello() {
+	const { data: session, status } = useSession();
+	const handle = async () => {
+		console.log("in async");
+		const jwt = session?.myIdToken;
+		console.log(`jwt: ${jwt}`);
+		const b = await fetch("http://localhost:5158/easy");
+		if (jwt) {
+			console.log("in jwt");
+			const a = await fetch("http://localhost:5158/signin", {
+				method: "POST",
+				credentials: "include",
+				headers: {
+					Authorization: `Bearer ${jwt}`,
+					"Content-Type": "application/json",
+				},
+			});
 		}
 
-		const response = await fetch(url, options);
-
-		if (!response.ok) {
-			throw new Error(`HTTP error! status: ${response.status}`);
+		const fa = await fetch("http://localhost:5158/secure", {
+			method: "GET",
+			headers: { "Content-Type": "application/json" },
+			credentials: "include",
+		});
+		const res = await fa.json();
+		const p = document.getElementById("res");
+		if (p) {
+			console.log("hi");
+			p.textContent = res.message;
 		}
-
-		// You can check the cookies that were set
-		console.log("Response headers:", response.headers);
-		console.log("Response status:", response.status);
-
-		return "";
+		console.log(res);
 	};
 
-	// Usage example with POST:
-	try {
-		const jwt = myToken;
-		if (jwt) {
-			const data = await makeAuthenticatedRequest(
-				"http://localhost:5299/signin",
-				jwt,
-				"POST",
-				{}
-			);
-			console.log("data")
-			console.log(data);
-		}
-	} catch (error) {
-		console.error("Error:", error);
-	}
-
 	return (
-		<form
-			action={async () => {
-				"use server";
-				await signIn("google");
-			}}
-		>
-			<button type="submit">Signin with Google</button>
-		</form>
+		<>
+			<button onClick={() => signIn("google")}>Sign In With Google</button>
+			<button onClick={handle}>Handle</button>
+			<h1>Result:</h1>
+			<p id="res"></p>
+		</>
 	);
 }
