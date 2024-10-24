@@ -2,6 +2,7 @@
 
 import { signIn } from "next-auth/react";
 import { useSession } from "next-auth/react";
+import GoogleButton from "react-google-button";
 
 export default function Hello() {
 	const { data: session, status } = useSession();
@@ -32,11 +33,21 @@ export default function Hello() {
 	};
 
 	return (
-		<>
-			<button onClick={() => signIn("google")}>Sign In With Google</button>
-			<button onClick={handle}>Handle</button>
-			<h1>Result:</h1>
-			<p id="res"></p>
-		</>
+		<div className="center">
+			<div className="login">
+				<GoogleButton
+					type="dark"
+					onClick={() => {
+						signIn("google");
+					}}
+				/>
+				<div className="secret-area">
+					<button className="info-button" onClick={handle}>
+						Get Info From Server
+					</button>
+					<p id="res"></p>
+				</div>
+			</div>
+		</div>
 	);
 }
